@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>XML 簡易表示サイト</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script>
+
+const globalInfo = {};
+
+
+const addCard = () => {
+  console.log("add");
+  const selectedFile = document.getElementById('addCard').files[0];
+  //console.log(selectedFile);
+  
+  const reader = new FileReader();
+  reader.onload = () => {
+    
+    const parser = new DOMParser();
+    const dom = parser.parseFromString(reader.result, "application/xml");
+    console.log(dom);
+    
+    setTimeout(() => {
+      const parent = document.getElementById('wrap');
+      parent.innerHTML = "読み込み完了！";
+    }, 0);
+    
+    setTimeout(() => {
+      renderXml(dom);
+    }, 0);
+    
+  }
+  
+  reader.readAsText(selectedFile); // , 'shift-jis'
+}
+
+
+const renderXml = (dom) => {
+  
+  console.log(dom.childNodes);
+  
+  //attributes
+  //childNodes || data
+  //tagName
+  
+  const res = createComponent(dom);
+  
+  const output = document.getElementById('results');
+  output.innerHTML = res;
+
+}
+
+const createComponent = (dom) => {
+  
+  if(!dom) return;
+  if(!dom.tagName && (dom.childNodes && !dom.childNodes.length) && !dom.data.match(/\S/)){
+    return;
+  }
+  //if(dom.nodeName == "#comment") return;
+  
+  const type = (dom.nodeName == "#comment") ? "type-comment" : (dom.nodeName == "#text") ? "type-text" : "type-default";
+  
+  let res = `<div class='item ${type}'>`;
+  
+  // tag name -----------------------------------------
+  
+  if(dom.nodeName != "#comment" && dom.nodeName != "#text" ){
+    res += `<div class='tagName'>${v(dom.tagName) || v(dom.nodeName)}</div>`;
+  }
+  
+  // attributes ---------------------------------------
+  
+  if(dom.attributes && dom.attributes.length){
+    res += `<div class='attributes'>`;
+    for(let i=0; i<dom.attributes.length; i++){
+      attr = dom.attributes[i];
+      res += `<span class='attribute'>${v(attr.name)}="${v(attr.value)}" </span>`
+    };
+    res += `</div>`; // attributes
+  }
+  
+  // child nodes -------------------------------------
+  
+  res += `<div class='children'>`;
+  
+  if(dom.childNodes && dom.childNodes.length){
+    dom.childNodes.forEach( childDom => {
+      const childRes = createComponent(childDom);
+      if(childRes) res += childRes;
+    });
+  }else if(dom.data && dom.data.match(/\S/)){
+    res += `<div class='text'>${v(dom.data)}</div>`; //ここはバリデーションが必要
+  }else{
+    //res += `---`;
+  }
+  
+  res += `</div>`; // children
+  
+  // -------------------------------------------------
+  
+  res += `</div>`; // item
+  
+  return res;
+  
+}
+
+const v = (string) => {
+
+  if(!string) return "";
+
+  return string.replace(/&/g,"&amp;")
+    .replace(/"/g,"&quot;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/'/g, "&#39;");
+}
+
+const copy = () => {
+  const copyText = document.getElementById('textBox');
+  console.log(copyText);
+  copyText.select();
+  document.execCommand("copy");
+}
+
+</script>
+
+<style>
+body{
+  background-color: #FFFFFF;
+}
+
+#memo {
+  background-color: #000000;
+  color: #FFFFFF;
+  border-radius: 4px;
+  margin: 8px;
+  padding: 4px;
+}
+
+#info {
+  margin: 8px;
+}
+
+#info input {
+  margin-right: 8px;
+}
+
+#wrap {
+  margin: 8px;
+  padding: 4px;
+}
+
+#outputTextArea {
+  display:block;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+#textBox {
+  display:block;
+  width: 100%;
+}
+
+
+div.item.type-default {
+  border: solid 1px #FFAAAA;
+  border-left: solid 4px #FFAAAA;
+}
+
+div.item.type-text div.text {
+  border-radius: 2px;
+  padding: 4px;
+  background-color: #FFEEEE;
+}
+
+div.item.type-comment {
+  color: #555555;
+  border-left: solid 4px #CCCCCC;
+}
+
+div.item.type-comment div.text::before {
+  content: "#";
+}
+
+div.item div {
+  margin: 2px;
+}
+
+div.item .children {
+  margin-left: 0.25em;
+}
+
+
+div.tagName {
+  color: #FF0000;
+  font-weight: bold;
+}
+
+div.attributes {
+  font-style: italic;
+}
+
+
+</style>
+
+</head>
+<body>
+
+<div id="overlayLargeImageSpace"></div>
+<div id="overlayLock"></div>
+<div id="page">
+  <div id="memo">
+  XML 簡易表示サイト
+  </div>
+  <div id="info">
+    <div id="infoAddCardButton">
+      <input type="file" id="addCard" onChange="addCard();">
+    </div>
+  </div>
+  <div id="wrap">
+  </div>
+  <div id="results">
+  </div>
+</div>
+
+<script>
+  
+</script>
+
+</body>
+</html>
+
+
