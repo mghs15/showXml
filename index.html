@@ -21,6 +21,8 @@ const addCard = () => {
     const dom = parser.parseFromString(reader.result, "application/xml");
     console.log(dom);
     
+    globalInfo.dom = dom;
+    
     setTimeout(() => {
       const parent = document.getElementById('wrap');
       parent.innerHTML = "読み込み完了！";
@@ -44,14 +46,65 @@ const renderXml = (dom) => {
   //childNodes || data
   //tagName
   
-  const res = createComponent(dom);
   
-  const output = document.getElementById('results');
-  output.innerHTML = res;
-
+  console.log(document.getElementById('choiceResultType').q1.value);
+  const choice = document.getElementById('choiceResultType').q1.value ;
+  
+  
+  if(choice == "json"){  
+    const output = document.getElementById('results');
+    const json = dom2json(dom);
+    output.innerHTML = "<textarea rows='25' cols='25'>" + JSON.stringify(json, null, 2) + "</textarea>";
+  }else{
+    const output = document.getElementById('results');
+    const res = createComponent(dom);
+    output.innerHTML = res;
+  }
+  
 }
 
-const createComponent = (dom) => {
+reRenderXml = () => {
+  renderXml(globalInfo.dom);
+}
+
+const dom2json = (dom) => {
+  
+  if(!dom) return;
+  if(!dom.tagName && (dom.childNodes && !dom.childNodes.length) && !dom.data.match(/\S/)){
+    return;
+  }
+  
+  const elem = {
+    "tag": dom.tagName,
+    "node": dom.nodeName,
+    "attr": {},
+    "children": [],
+    "content": null
+  };
+  
+  if(dom.attributes && dom.attributes.length){
+    for(let i=0; i<dom.attributes.length; i++){
+      const attr = dom.attributes[i];
+      elem.attr[attr.name] = attr.value;
+    };
+  }
+  
+  if(dom.childNodes && dom.childNodes.length){
+    dom.childNodes.forEach( childDom => {
+      const child = dom2json(childDom);
+      if(child) elem.children.push(child);
+    });
+  }else if(dom.data && dom.data.match(/\S/)){
+    elem.content = dom.data;
+  }else{
+    //
+  }
+  
+  return elem;
+  
+}
+
+const createComponent = (dom, ancestor = "") => {
   
   if(!dom) return;
   if(!dom.tagName && (dom.childNodes && !dom.childNodes.length) && !dom.data.match(/\S/)){
@@ -66,7 +119,7 @@ const createComponent = (dom) => {
   // tag name -----------------------------------------
   
   if(dom.nodeName != "#comment" && dom.nodeName != "#text" ){
-    res += `<div class='tagName'>${v(dom.tagName) || v(dom.nodeName)}</div>`;
+    res += `<div class='tagName' title='${ancestor}'>${v(dom.tagName) || v(dom.nodeName)}</div>`;
   }
   
   // attributes ---------------------------------------
@@ -89,12 +142,16 @@ const createComponent = (dom) => {
   res += `<div class='children'>`;
   
   if(dom.childNodes && dom.childNodes.length){
+    
+    const sep = ancestor ? "\n> " : "";
+    const nextAncestor = ancestor + sep + `${v(dom.tagName) || v(dom.nodeName)}`;
+    
     dom.childNodes.forEach( childDom => {
-      const childRes = createComponent(childDom);
+      const childRes = createComponent(childDom, nextAncestor);
       if(childRes) res += childRes;
     });
   }else if(dom.data && dom.data.match(/\S/)){
-    res += `<div class='text'>${v(dom.data)}</div>`; //ここはバリデーションが必要
+    res += `<div class='text'>${v(dom.data)}</div>`;
   }else{
     //res += `---`;
   }
@@ -224,6 +281,12 @@ div.attributes span.attribute-name-xmlns {
   font-weight: bold;
 }
 
+#result textarea {
+  left: 1em;
+  right: 1em;
+  bottom: 1em;
+}
+
 </style>
 
 </head>
@@ -239,6 +302,10 @@ div.attributes span.attribute-name-xmlns {
     <div id="infoAddCardButton">
       <input type="file" id="addCard" onChange="addCard();">
     </div>
+    <form id="choiceResultType">
+      <input type="radio" name="q1" onChange="reRenderXml();" value="show" checked><label>表示</label>
+      <input type="radio" name="q1" onChange="reRenderXml();" value="json"><label>JSON</label>
+    </form>
   </div>
   <div id="wrap">
   </div>
