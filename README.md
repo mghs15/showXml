@@ -9,7 +9,7 @@ https://mghs15.github.io/showXml/
 * `tag`: タグ名（string）。
 * `node`: ノード名（string）。
 * `attr`: 属性（object）。属性名が key、属性値が value の object。
-* `children`: Childe Node の配列（array）。配列の要素は、同じ構造の JSON Object。
+* `children`: Child Node の配列（array）。配列の要素は、同じ構造の JSON Object。
 * `content`: 内容（String）。
 
 ## 参考文献
