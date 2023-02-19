@@ -75,7 +75,11 @@ const createComponent = (dom) => {
     res += `<div class='attributes'>`;
     for(let i=0; i<dom.attributes.length; i++){
       attr = dom.attributes[i];
-      res += `<span class='attribute'>${v(attr.name)}="${v(attr.value)}" </span>`
+      const attrName = v(attr.name)
+                       .replace(/^xmlns:/, "<span class='attribute-name-xmlns'>xmlns:</span>")
+                       .replace(/^xmlns$/, "<span class='attribute-name-xmlns'>xmlns</span>");
+      const attrValue = v(attr.value);
+      res += `<span class='attribute'><span class='attribute-name'>${attrName}</span>="<span class='attribute-value'>${attrValue}</span>" </span>`
     };
     res += `</div>`; // attributes
   }
@@ -198,7 +202,7 @@ div.tagName {
   font-weight: bold;
 }
 
-div.attributes span {
+div.attributes span.attribute {
   display: inline-block;
   font-size: 90%;
   font-style: italic;
@@ -210,7 +214,15 @@ div.attributes span {
   border-bottom: solid 1px #DDDDDD;
 }
 
+div.attributes span.attribute::before {
+  content: "●";
+  color: #AAAAAA;
+  font-style: normal;
+}
 
+div.attributes span.attribute-name-xmlns {
+  font-weight: bold;
+}
 
 </style>
 
