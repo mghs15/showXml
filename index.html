@@ -46,7 +46,7 @@ const copy = () => {
 
 const renderXml = (dom) => {
   
-  console.log(dom.childNodes);
+  //console.log(dom.childNodes);
   
   console.log(document.getElementById('choiceResultType').q1.value);
   const choice = document.getElementById('choiceResultType').q1.value ;
@@ -56,6 +56,10 @@ const renderXml = (dom) => {
     const json = dom2json(dom);
     output.innerHTML = "<textarea id='textBox' rows='25' cols='25'>" + JSON.stringify(json, null, 2) + "</textarea>"
                      + "<button class='copyButton' onClick='copy();'>JSONをコピー</button>";
+  }else if(choice == "console"){
+    const json = dom2json(dom);
+    console.log("---");
+    console.log(json);
   }else{
     const output = document.getElementById('results');
     const res = createComponent(dom);
@@ -298,8 +302,9 @@ div.attributes span.attribute-name-xmlns {
       <input type="file" id="addCard" onChange="addCard();">
     </div>
     <form id="choiceResultType">
-      <input type="radio" name="q1" onChange="reRenderXml();" value="show" checked><label>表示</label>
+      <input type="radio" name="q1" onChange="reRenderXml();" value="show"><label>表示</label>
       <input type="radio" name="q1" onChange="reRenderXml();" value="json"><label>JSON</label>
+      <input type="radio" name="q1" onChange="reRenderXml();" value="console" checked><label>非表示（コンソールのみ）</label>
     </form>
   </div>
   <div id="wrap">
