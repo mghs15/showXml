@@ -37,24 +37,25 @@ const addCard = () => {
   reader.readAsText(selectedFile); // , 'shift-jis'
 }
 
+const copy = () => {
+  const copyText = document.getElementById('textBox');
+  console.log(copyText);
+  copyText.select();
+  document.execCommand("copy");
+}
 
 const renderXml = (dom) => {
   
   console.log(dom.childNodes);
   
-  //attributes
-  //childNodes || data
-  //tagName
-  
-  
   console.log(document.getElementById('choiceResultType').q1.value);
   const choice = document.getElementById('choiceResultType').q1.value ;
-  
   
   if(choice == "json"){  
     const output = document.getElementById('results');
     const json = dom2json(dom);
-    output.innerHTML = "<textarea rows='25' cols='25'>" + JSON.stringify(json, null, 2) + "</textarea>";
+    output.innerHTML = "<textarea id='textBox' rows='25' cols='25'>" + JSON.stringify(json, null, 2) + "</textarea>"
+                     + "<button class='copyButton' onClick='copy();'>JSONをコピー</button>";
   }else{
     const output = document.getElementById('results');
     const res = createComponent(dom);
@@ -177,12 +178,6 @@ const v = (string) => {
     .replace(/'/g, "&#39;");
 }
 
-const copy = () => {
-  const copyText = document.getElementById('textBox');
-  console.log(copyText);
-  copyText.select();
-  document.execCommand("copy");
-}
 
 </script>
 
